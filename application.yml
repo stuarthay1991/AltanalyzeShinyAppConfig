@@ -1,0 +1,42 @@
+# server:
+#  forward-headers-strategy: native
+
+server:
+  useForwardHeaders: true
+  contextPath: /shiny
+  servlet:
+    context-path: /shiny
+
+proxy:
+  title: LungMap Shiny Apps (DEV)
+  logo-url: https://www.lungmap.net/resources/themes/lungmap/img/logo.png
+  landing-page: /
+  heartbeat-rate: 10000
+  heartbeat-timeout: 60000
+  container-wait-time: 180000
+  authentication: none
+  port: 8080
+  specs:
+  - id: 01_hello
+    container-cmd: ["R", "-e", "shinyproxy::run_01_hello()"]
+    container-image: openanalytics/shinyproxy-demo
+  - id: 06_tabsets
+    container-cmd: ["R", "-e", "shinyproxy::run_06_tabsets()"]
+    container-image: openanalytics/shinyproxy-demo
+  - id: cellxgene-pbmc
+    display-name: cell x gene  pbmc3k
+    container-image: cellxgene
+    container-cmd: ["--no-upgrade-check", "launch", "--host", "0.0.0.0", "--port", "3838", "/sources/pbmc3k.h5ad"]
+    container-volumes: [ "/sources:/sources:ro" ]
+  - id: shinycell-human-lung-cellref
+    display-name: shinycell-human-lung-cellref
+    container-image: ghcr.io/cchmc/shinycell-human-lung-cellref:latest
+  - id: bone-marrow
+    display-name: Azimuth Bone Marrow
+    container-cmd: ["R", "-e", "options('Azimuth.app.do_adt' = TRUE)", "-e", "options('Azimuth.app.demodataset' = '/reference-data/demodatas$
+    container-image: satijalab/azimuth:0.4.6
+    container-volumes: [ "/reference-data:/reference-data:ro" ]
+
+logging:
+  file:
+    name: shinyproxy.log
